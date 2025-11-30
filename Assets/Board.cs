@@ -4,8 +4,12 @@ using UnityEngine.Tilemaps;
 public class Board : MonoBehaviour
 {
     public Tilemap tilemap;
-    public Piece activePiece;   
+    public Piece activePiece;
     public TetrominoData[] tetrominoes;
+
+    // ↓ 1. 盤面のサイズを定義（横10マス、縦20マス）
+    // 左下が(-5, -10)、サイズが(10, 20) という意味です
+    public RectInt Bounds = new RectInt(new Vector2Int(-5, -10), new Vector2Int(10, 20));
 
     private void Awake()
     {
@@ -21,23 +25,21 @@ public class Board : MonoBehaviour
 
     public void SpawnPiece()
     {
-        // ランダムな形を選ぶ
         int random = Random.Range(0, this.tetrominoes.Length);
         TetrominoData data = this.tetrominoes[random];
 
-        // ピースを初期化（画面の上の方に出現させる）
         this.activePiece.Initialize(this, new Vector3Int(-1, 8, 0), data);
         
-        // 画面に描画する
-        Set(this.activePiece);
+        // ↓ スポーンした瞬間も一応チェックして、ダメならGAMEOVER（今はセットするだけ）
+        if (IsValidPosition(this.activePiece, new Vector3Int(-1, 8, 0))) {
+            Set(this.activePiece);
+        }
     }
 
-    // タイルマップにブロックを描き込む関数
     public void Set(Piece piece)
     {
         for (int i = 0; i < piece.cells.Length; i++)
         {
-            // ブロックの現在地 + 形のオフセット = 塗る場所
             Vector3Int tilePosition = piece.cells[i] + piece.position;
             this.tilemap.SetTile(tilePosition, piece.data.tile);
         }
@@ -48,8 +50,31 @@ public class Board : MonoBehaviour
         for (int i = 0; i < piece.cells.Length; i++)
         {
             Vector3Int tilePosition = piece.cells[i] + piece.position;
-            // nullをセットすると、その場所のタイルが消えます
             this.tilemap.SetTile(tilePosition, null);
         }
+    }
+
+    // ↓ 2. ここが今回の主役！「その場所に行ってもいい？」を判定する関数
+    public bool IsValidPosition(Piece piece, Vector3Int position)
+    {
+        RectInt bounds = this.Bounds;
+
+        for (int i = 0; i < piece.cells.Length; i++)
+        {
+            // ブロック1つ1つの予定地を計算
+            Vector3Int tilePosition = piece.cells[i] + position;
+
+            // A. 盤面の枠からはみ出していないか？
+            if (!bounds.Contains((Vector2Int)tilePosition)) {
+                return false; // ダメ！枠外です
+            }
+
+            // B. すでに他のブロック（タイル）がないか？
+            if (this.tilemap.HasTile(tilePosition)) {
+                return false; // ダメ！すでに埋まってます
+            }
+        }
+
+        return true; // 全部OK！
     }
 }

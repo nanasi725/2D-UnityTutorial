@@ -47,10 +47,22 @@ public class Piece : MonoBehaviour
     }
 
     // 座標を足し算するだけの関数
+// 変更前は「無条件で移動」していましたが...
+    // ↓
     private void Move(Vector2Int translation)
     {
-        // 今の場所(x, y) に 移動量(dx, dy) を足す
-        this.position.x += translation.x;
-        this.position.y += translation.y;
+        // 1. まず「移動後の未来の座標」を計算してみる
+        Vector3Int newPosition = this.position;
+        newPosition.x += translation.x;
+        newPosition.y += translation.y;
+
+        // 2. Boardに「そこ行っていい？」と聞く
+        bool valid = this.board.IsValidPosition(this, newPosition);
+
+        // 3. OKと言われたら、初めて実際に座標を更新する
+        if (valid)
+        {
+            this.position = newPosition;
+        }
     }
 }
