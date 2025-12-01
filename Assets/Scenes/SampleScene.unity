@@ -420,7 +420,7 @@ Grid:
   m_GameObject: {fileID: 1459079221}
   m_Enabled: 1
   m_CellSize: {x: 1, y: 1, z: 0}
-  m_CellGap: {x: 0, y: 0, z: 0}
+  m_CellGap: {x: 0.1, y: 0.1, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
 --- !u!4 &1459079223
@@ -491,22 +491,22 @@ MonoBehaviour:
   - tetromino: 0
     tile: {fileID: 11400000, guid: a00f04ce56c90bd4cac673092ffed8de, type: 2}
     cells: []
-  - tetromino: 0
+  - tetromino: 1
     tile: {fileID: 11400000, guid: a00f04ce56c90bd4cac673092ffed8de, type: 2}
     cells: []
-  - tetromino: 0
+  - tetromino: 2
     tile: {fileID: 11400000, guid: a00f04ce56c90bd4cac673092ffed8de, type: 2}
     cells: []
-  - tetromino: 0
+  - tetromino: 3
     tile: {fileID: 11400000, guid: a00f04ce56c90bd4cac673092ffed8de, type: 2}
     cells: []
-  - tetromino: 0
+  - tetromino: 4
     tile: {fileID: 11400000, guid: a00f04ce56c90bd4cac673092ffed8de, type: 2}
     cells: []
-  - tetromino: 0
+  - tetromino: 5
     tile: {fileID: 11400000, guid: a00f04ce56c90bd4cac673092ffed8de, type: 2}
     cells: []
-  - tetromino: 0
+  - tetromino: 6
     tile: {fileID: 11400000, guid: a00f04ce56c90bd4cac673092ffed8de, type: 2}
     cells: []
   Bounds:
