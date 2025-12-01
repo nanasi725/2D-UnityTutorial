@@ -28,11 +28,21 @@ public class Board : MonoBehaviour
         int random = Random.Range(0, this.tetrominoes.Length);
         TetrominoData data = this.tetrominoes[random];
 
-        this.activePiece.Initialize(this, new Vector3Int(-1, 8, 0), data);
+        // スポーン位置（上の方）
+        Vector3Int spawnPosition = new Vector3Int(-1, 8, 0);
+
+        this.activePiece.Initialize(this, spawnPosition, data);
         
-        // ↓ スポーンした瞬間も一応チェックして、ダメならGAMEOVER（今はセットするだけ）
-        if (IsValidPosition(this.activePiece, new Vector3Int(-1, 8, 0))) {
+        // ↓ ここを変更！
+        // 「もしスポーン位置に置けるなら（空いているなら）」
+        if (IsValidPosition(this.activePiece, spawnPosition))
+        {
             Set(this.activePiece);
+        }
+        else
+        {
+            // 「もう置けない（積み上がっちゃった）なら」
+            GameOver();
         }
     }
 
@@ -54,6 +64,81 @@ public class Board : MonoBehaviour
         }
     }
 
+    public void GameOver()
+    {
+        this.tilemap.ClearAllTiles();
+    }
+
+    // 行が揃っているかチェックして消す（完成版）
+    public void ClearLines()
+    {
+        RectInt bounds = this.Bounds;
+        int row = bounds.yMin; // 一番下の行からスタート
+
+        // 一番上の行までチェック
+        while (row < bounds.yMax)
+        {
+            // 1. この行は満杯か？
+            if (IsLineFull(row))
+            {
+                // 2. 満杯なら消す！
+                LineClear(row);
+                
+                // 3. 消した後、上のブロックが落ちてくるので、
+                // row（行番号）を増やさずに、もう一度同じ行をチェックさせる
+            }
+            else
+            {
+                // 満杯じゃなければ、次の行へ
+                row++;
+            }
+        }
+    }
+
+    // 指定された行が「全部埋まってるか」調べる関数
+    private bool IsLineFull(int row)
+    {
+        RectInt bounds = this.Bounds;
+
+        // 左端(xMin)から右端(xMax)まで全部見る
+        for (int col = bounds.xMin; col < bounds.xMax; col++)
+        {
+            Vector3Int position = new Vector3Int(col, row, 0);
+
+            // もし1つでも「空っぽ」があったら false
+            if (!this.tilemap.HasTile(position)) {
+                return false;
+            }
+        }
+        return true; // 全部埋まってた！
+    }
+
+    // 指定された行を消して、上をずらす関数
+    private void LineClear(int row)
+    {
+        RectInt bounds = this.Bounds;
+
+        // 1. 指定された行(row)のタイルを全部消す
+        for (int col = bounds.xMin; col < bounds.xMax; col++)
+        {
+            Vector3Int position = new Vector3Int(col, row, 0);
+            this.tilemap.SetTile(position, null);
+        }
+
+        // 2. その行より「上」にある全ブロックを、1段ずつ下にコピーする
+        while (row < bounds.yMax)
+        {
+            for (int col = bounds.xMin; col < bounds.xMax; col++)
+            {
+                Vector3Int sourcePos = new Vector3Int(col, row + 1, 0); // 上の段
+                Vector3Int targetPos = new Vector3Int(col, row, 0);     // 下の段
+
+                TileBase above = this.tilemap.GetTile(sourcePos); // 上の段のタイルを取得
+                this.tilemap.SetTile(targetPos, above);           // 下の段に置く
+            }
+            row++;
+        }
+    }
     // ↓ 2. ここが今回の主役！「その場所に行ってもいい？」を判定する関数
     public bool IsValidPosition(Piece piece, Vector3Int position)
     {
